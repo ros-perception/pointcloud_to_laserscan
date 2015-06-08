@@ -55,7 +55,7 @@ namespace pointcloud_to_laserscan
     private_nh_ = getPrivateNodeHandle();
 
     private_nh_.param<std::string>("target_frame", target_frame_, "");
-    private_nh_.param<double>("tolerance", tolerance_, 0.01);
+    private_nh_.param<double>("transform_tolerance", tolerance_, 0.01);
     private_nh_.param<double>("min_height", min_height_, 0.0);
     private_nh_.param<double>("max_height", max_height_, 1.0);
 
@@ -93,8 +93,9 @@ namespace pointcloud_to_laserscan
     // if pointcloud target frame specified, we need to filter by transform availability
     if (!target_frame_.empty())
     {
-      message_filter_.reset(new MessageFilter(sub_, tf2_, target_frame_, input_queue_size_, nh_));
-      message_filter_->setTolerance(ros::Duration(tolerance_));
+      tf2_.reset(new tf2_ros::Buffer());
+      tf2_listener_.reset(new tf2_ros::TransformListener(*tf2_));
+      message_filter_.reset(new MessageFilter(sub_, *tf2_, target_frame_, input_queue_size_, nh_));
       message_filter_->registerCallback(boost::bind(&PointCloudToLaserScanNodelet::cloudCb, this, _1));
       message_filter_->registerFailureCallback(boost::bind(&PointCloudToLaserScanNodelet::failureCb, this, _1, _2));
     }
@@ -132,7 +133,7 @@ namespace pointcloud_to_laserscan
                                                tf2_ros::filter_failure_reasons::FilterFailureReason reason)
   {
     NODELET_WARN_STREAM_THROTTLE(1.0, "Can't transform pointcloud from frame " << cloud_msg->header.frame_id << " to "
-        << message_filter_->getTargetFramesString() << " with tolerance " << tolerance_);
+        << message_filter_->getTargetFramesString());
   }
 
   void PointCloudToLaserScanNodelet::cloudCb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
@@ -176,7 +177,7 @@ namespace pointcloud_to_laserscan
       try
       {
         cloud.reset(new sensor_msgs::PointCloud2);
-        tf2_.transform(*cloud_msg, *cloud, target_frame_, ros::Duration(tolerance_));
+        tf2_->transform(*cloud_msg, *cloud, target_frame_, ros::Duration(tolerance_));
         cloud_out = cloud;
       }
       catch (tf2::TransformException ex)

@@ -46,6 +46,7 @@
 
 #include "nodelet/nodelet.h"
 #include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
 #include "tf2_ros/message_filter.h"
 #include "message_filters/subscriber.h"
 #include "sensor_msgs/PointCloud2.h"
@@ -79,7 +80,8 @@ namespace pointcloud_to_laserscan
     ros::Publisher pub_;
     boost::mutex connect_mutex_;
 
-    tf2_ros::Buffer tf2_;
+    boost::shared_ptr<tf2_ros::Buffer> tf2_;
+    boost::shared_ptr<tf2_ros::TransformListener> tf2_listener_;
     message_filters::Subscriber<sensor_msgs::PointCloud2> sub_;
     boost::shared_ptr<MessageFilter> message_filter_;
 
