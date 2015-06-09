@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.0 (2015-06-09)
+------------------
 * Fix pointcloud to laserscan transform tolerance issues
 * Move pointcloud_to_laserscan to new repository
 * Contributors: Paul Bovbel
