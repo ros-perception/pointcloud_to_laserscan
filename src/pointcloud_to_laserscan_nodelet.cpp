@@ -66,6 +66,10 @@ namespace pointcloud_to_laserscan
     private_nh_.param<double>("range_min", range_min_, 0.45);
     private_nh_.param<double>("range_max", range_max_, 4.0);
 
+
+    private_nh_.param<int>("minimum_number_of_elements", maximum_number_of_elements_, 4);
+
+
     int concurrency_level;
     private_nh_.param<int>("concurrency_level", concurrency_level, 1);
     private_nh_.param<bool>("use_inf", use_inf_, true);
