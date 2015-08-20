@@ -141,6 +141,7 @@ namespace pointcloud_to_laserscan
 
     //build laserscan output
     sensor_msgs::LaserScan output;
+
     output.header = cloud_msg->header;
     if (!target_frame_.empty())
     {
@@ -168,6 +169,7 @@ namespace pointcloud_to_laserscan
       output.ranges.assign(ranges_size, output.range_max + 1.0);
     }
 
+
     sensor_msgs::PointCloud2ConstPtr cloud_out;
     sensor_msgs::PointCloud2Ptr cloud;
 
@@ -190,6 +192,10 @@ namespace pointcloud_to_laserscan
     {
       cloud_out = cloud_msg;
     }
+
+    double number_of_elements_for_index[ranges_size];
+    std::list<double> ranges[ranges_size];
+    int maximum_number_of_elements=5; // Keep the 5 smallest element
 
     // Iterate through pointcloud
     for (sensor_msgs::PointCloud2ConstIterator<float>
@@ -227,12 +233,43 @@ namespace pointcloud_to_laserscan
 
       //overwrite range at laserscan ray if new range is smaller
       int index = (angle - output.angle_min) / output.angle_increment;
+
+	  if (number_of_elements_for_index[index] < maximum_number_of_elements){
+    	  ranges[index].push_back(range);
+    	  ++number_of_elements_for_index[index];
+    	  if (number_of_elements_for_index[index] == maximum_number_of_elements){
+    		  ranges[index].sort();
+    	  }
+	  }
+
+	  else if (range < ranges[index].back())
+      {
+		  ranges[index].pop_back();
+		  ranges[index].push_back(range);
+		  ranges[index].sort();
+      }
+
+      /*
       if (range < output.ranges[index])
       {
         output.ranges[index] = range;
       }
-
+      */
     }
+
+    //double minimum_diff = 0.01; // 1 cm
+    for (int index=0;index<ranges_size;++index){
+    	if (number_of_elements_for_index[index]==maximum_number_of_elements){
+    		output.ranges[index] = ranges[index][maximum_number_of_elements-1];
+    		/*
+    		if(ranges[index][maximum_number_of_elements-1]-ranges[index][0] < minimum_diff){
+
+    		}else{
+
+    		}*/
+    	}
+    }
+
     pub_.publish(output);
   }
 
