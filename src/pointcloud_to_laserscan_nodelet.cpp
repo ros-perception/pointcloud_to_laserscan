@@ -67,7 +67,7 @@ namespace pointcloud_to_laserscan
     private_nh_.param<double>("range_max", range_max_, 4.0);
 
 
-    private_nh_.param<int>("minimum_number_of_elements", maximum_number_of_elements_, 4);
+    private_nh_.param<int>("ignore_first_num_of_points", ignore_first_num_of_points_, 1);
 
 
     int concurrency_level;
@@ -199,7 +199,7 @@ namespace pointcloud_to_laserscan
 
     double number_of_elements_for_index[ranges_size];
     std::list<double> ranges[ranges_size];
-    int maximum_number_of_elements = maximum_number_of_elements_; // Keep the n smallest element
+    int number_of_points_to_ignore = ignore_first_num_of_points_; // Keep the n smallest element
 
     // Iterate through pointcloud
     for (sensor_msgs::PointCloud2ConstIterator<float>
@@ -238,11 +238,11 @@ namespace pointcloud_to_laserscan
       //overwrite range at laserscan ray if new range is smaller
       int index = (angle - output.angle_min) / output.angle_increment;
 
-      if (maximum_number_of_elements > 1){
-    	  if (number_of_elements_for_index[index] < maximum_number_of_elements){
+      if (number_of_points_to_ignore > 1){
+    	  if (number_of_elements_for_index[index] < number_of_points_to_ignore){
     	      ranges[index].push_back(range);
     	      ++number_of_elements_for_index[index];
-    	      if (number_of_elements_for_index[index] == maximum_number_of_elements){
+    	      if (number_of_elements_for_index[index] == number_of_points_to_ignore){
     	      	ranges[index].sort();
     	      }
     	  }
@@ -260,9 +260,9 @@ namespace pointcloud_to_laserscan
       }
     }
 
-    if (maximum_number_of_elements > 1){
+    if (number_of_points_to_ignore > 1){
 		for (int index=0;index<ranges_size;++index){
-			if (number_of_elements_for_index[index]==maximum_number_of_elements){
+			if (number_of_elements_for_index[index]==number_of_points_to_ignore){
 				output.ranges[index] = ranges[index].back();
 			}
 		}
