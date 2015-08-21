@@ -238,22 +238,21 @@ namespace pointcloud_to_laserscan
       //overwrite range at laserscan ray if new range is smaller
       int index = (angle - output.angle_min) / output.angle_increment;
 
-
       if (maximum_number_of_elements > 1){
     	  if (number_of_elements_for_index[index] < maximum_number_of_elements){
-    	      	  ranges[index].push_back(range);
-    	      	  ++number_of_elements_for_index[index];
-    	      	  if (number_of_elements_for_index[index] == maximum_number_of_elements){
-    	      		  ranges[index].sort();
-    	      	  }
-    	  	  }
+    	      ranges[index].push_back(range);
+    	      ++number_of_elements_for_index[index];
+    	      if (number_of_elements_for_index[index] == maximum_number_of_elements){
+    	      	ranges[index].sort();
+    	      }
+    	  }
 
-    	  	  else if (range < ranges[index].back())
-    	        {
-    	  		  ranges[index].pop_back();
-    	  		  ranges[index].push_back(range);
-    	  		  ranges[index].sort();
-    	        }
+    	  else if (range < ranges[index].back())
+    	  {
+    	  	ranges[index].pop_back();
+    	        ranges[index].push_back(range);
+    	        ranges[index].sort();
+    	  }
       }
       else if (range < output.ranges[index])
       {
