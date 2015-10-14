@@ -78,6 +78,8 @@ namespace pointcloud_to_laserscan
 
     ros::NodeHandle nh_, private_nh_;
     ros::Publisher pub_;
+    ros::Publisher pub_clearing_;
+
     boost::mutex connect_mutex_;
 
     boost::shared_ptr<tf2_ros::Buffer> tf2_;
