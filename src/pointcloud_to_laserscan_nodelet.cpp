@@ -111,6 +111,8 @@ namespace pointcloud_to_laserscan
     pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 10,
                                                  boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
                                                  boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+
+    pub_clearing_ = nh_.advertise<sensor_msgs::LaserScan>("clearing_scan", 10);
   }
 
   void PointCloudToLaserScanNodelet::connectCb()
@@ -144,7 +146,8 @@ namespace pointcloud_to_laserscan
   {
 
     //build laserscan output
-    sensor_msgs::LaserScan output;
+	sensor_msgs::LaserScan output;
+
 
     output.header = cloud_msg->header;
     if (!target_frame_.empty())
@@ -163,14 +166,18 @@ namespace pointcloud_to_laserscan
     //determine amount of rays to create
     uint32_t ranges_size = std::ceil((output.angle_max - output.angle_min) / output.angle_increment);
 
+    sensor_msgs::LaserScan output_clearing(output);
+
     //determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
     if (use_inf_)
     {
       output.ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+      output_clearing.ranges.assign(ranges_size, output.range_max-1.);
     }
     else
     {
       output.ranges.assign(ranges_size, output.range_max + 1.0);
+      output_clearing = output;
     }
 
 
@@ -257,6 +264,7 @@ namespace pointcloud_to_laserscan
       else if (range < output.ranges[index])
       {
         output.ranges[index] = range;
+        output_clearing.ranges[index] = 0.;
       }
     }
 
@@ -264,11 +272,13 @@ namespace pointcloud_to_laserscan
 		for (int index=0;index<ranges_size;++index){
 			if (number_of_elements_for_index[index]==number_of_points_to_ignore){
 				output.ranges[index] = ranges[index].back();
+				output_clearing.ranges[index] = 0.;
 			}
 		}
     }
 
     pub_.publish(output);
+    pub_clearing_.publish(output_clearing);
   }
 
 }
