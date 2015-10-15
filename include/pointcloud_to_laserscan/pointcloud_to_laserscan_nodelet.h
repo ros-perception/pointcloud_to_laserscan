@@ -58,6 +58,16 @@ namespace pointcloud_to_laserscan
 /**
 * Class to process incoming pointclouds into laserscans. Some initial code was pulled from the defunct turtlebot
 * pointcloud_to_laserscan implementation.
+*
+* BrainCorp modifications:
+*
+* - A parameter use_inf is provided to write out inf instead of max_range + 1 for
+*   angles where no point is traced.
+* - The node produces two scans: the default /scan, and an additional /scan_clearing;
+*   the latter has a range of infinity or max_range + 1. (depending on the use_inf
+*   parameter) for rays where some point could be traced (so they have a valid range
+*   in /scan), and has a valid range (max_range - 1.) for rays that don't meet
+*   any points in the cloud.
 */
   class PointCloudToLaserScanNodelet : public nodelet::Nodelet
   {
@@ -78,6 +88,8 @@ namespace pointcloud_to_laserscan
 
     ros::NodeHandle nh_, private_nh_;
     ros::Publisher pub_;
+    ros::Publisher pub_clearing_;
+
     boost::mutex connect_mutex_;
 
     boost::shared_ptr<tf2_ros::Buffer> tf2_;
@@ -91,6 +103,7 @@ namespace pointcloud_to_laserscan
     double tolerance_;
     double min_height_, max_height_, angle_min_, angle_max_, angle_increment_, scan_time_, range_min_, range_max_;
     bool use_inf_;
+    int ignore_first_num_of_points_;
   };
 
 }  // pointcloud_to_laserscan
