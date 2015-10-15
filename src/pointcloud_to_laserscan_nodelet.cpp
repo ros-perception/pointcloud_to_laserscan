@@ -170,16 +170,11 @@ namespace pointcloud_to_laserscan
 
     //determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
     if (use_inf_)
-    {
       output.ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
-      output_clearing.ranges.assign(ranges_size, output.range_max-1.);
-    }
     else
-    {
       output.ranges.assign(ranges_size, output.range_max + 1.0);
-      output_clearing = output;
-    }
 
+    output_clearing.ranges.assign(ranges_size, output.range_max - 1.);
 
     sensor_msgs::PointCloud2ConstPtr cloud_out;
     sensor_msgs::PointCloud2Ptr cloud;
@@ -264,7 +259,8 @@ namespace pointcloud_to_laserscan
       else if (range < output.ranges[index])
       {
         output.ranges[index] = range;
-        output_clearing.ranges[index] = 0.;
+        if (use_inf_) output_clearing.ranges[index] = std::numeric_limits<double>::infinity();
+        else output_clearing.ranges[index] = output.range_max + 1.0;
       }
     }
 
@@ -272,7 +268,8 @@ namespace pointcloud_to_laserscan
 		for (int index=0;index<ranges_size;++index){
 			if (number_of_elements_for_index[index]==number_of_points_to_ignore){
 				output.ranges[index] = ranges[index].back();
-				output_clearing.ranges[index] = 0.;
+                if (use_inf_) output_clearing.ranges[index] = std::numeric_limits<double>::infinity();
+                else output_clearing.ranges[index] = output.range_max + 1.0;
 			}
 		}
     }

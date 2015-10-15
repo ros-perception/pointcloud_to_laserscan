@@ -58,6 +58,16 @@ namespace pointcloud_to_laserscan
 /**
 * Class to process incoming pointclouds into laserscans. Some initial code was pulled from the defunct turtlebot
 * pointcloud_to_laserscan implementation.
+*
+* BrainCorp modifications:
+*
+* - A parameter use_inf is provided to write out inf instead of max_range + 1 for
+*   angles where no point is traced.
+* - The node produces two scans: the default /scan, and an additional /scan_clearing;
+*   the latter has a range of infinity or max_range + 1. (depending on the use_inf
+*   parameter) for rays where some point could be traced (so they have a valid range
+*   in /scan), and has a valid range (max_range - 1.) for rays that don't meet
+*   any points in the cloud.
 */
   class PointCloudToLaserScanNodelet : public nodelet::Nodelet
   {
