@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.3.1 (2017-04-26)
+------------------
 * Merge pull request `#4 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/4>`_ from yoshimalucky/fix-miscalculation-in-angle-increment
   Fixed miscalculation in angle_increment in the launch files.
 * fixed miscalculation in angle_increment in the launchfiles.
