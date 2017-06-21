@@ -65,6 +65,7 @@ namespace pointcloud_to_laserscan
     private_nh_.param<double>("scan_time", scan_time_, 1.0 / 30.0);
     private_nh_.param<double>("range_min", range_min_, 0.0);
     private_nh_.param<double>("range_max", range_max_, std::numeric_limits<double>::max());
+    private_nh_.param<double>("inf_epsilon", inf_epsilon_, 1.0);
 
     int concurrency_level;
     private_nh_.param<int>("concurrency_level", concurrency_level, 1);
@@ -165,7 +166,7 @@ namespace pointcloud_to_laserscan
     }
     else
     {
-      output.ranges.assign(ranges_size, output.range_max + 1.0);
+      output.ranges.assign(ranges_size, output.range_max + inf_epsilon_);
     }
 
     sensor_msgs::PointCloud2ConstPtr cloud_out;

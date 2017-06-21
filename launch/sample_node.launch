@@ -27,6 +27,7 @@
             range_min: 0.45
             range_max: 4.0
             use_inf: true
+            inf_epsilon: 1.0
 
             # Concurrency level, affects number of pointclouds queued for processing and number of threads used
             # 0 : Detect number of cores
