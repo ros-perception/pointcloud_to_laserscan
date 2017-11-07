@@ -56,15 +56,15 @@ namespace pointcloud_to_laserscan
 
     private_nh_.param<std::string>("target_frame", target_frame_, "");
     private_nh_.param<double>("transform_tolerance", tolerance_, 0.01);
-    private_nh_.param<double>("min_height", min_height_, 0.0);
-    private_nh_.param<double>("max_height", max_height_, 1.0);
+    private_nh_.param<double>("min_height", min_height_, std::numeric_limits<double>::min());
+    private_nh_.param<double>("max_height", max_height_, std::numeric_limits<double>::max());
 
-    private_nh_.param<double>("angle_min", angle_min_, -M_PI / 2.0);
-    private_nh_.param<double>("angle_max", angle_max_, M_PI / 2.0);
-    private_nh_.param<double>("angle_increment", angle_increment_, M_PI / 360.0);
+    private_nh_.param<double>("angle_min", angle_min_, - M_PI);
+    private_nh_.param<double>("angle_max", angle_max_, M_PI);
+    private_nh_.param<double>("angle_increment", angle_increment_, M_PI / 180.0);
     private_nh_.param<double>("scan_time", scan_time_, 1.0 / 30.0);
-    private_nh_.param<double>("range_min", range_min_, 0.45);
-    private_nh_.param<double>("range_max", range_max_, 4.0);
+    private_nh_.param<double>("range_min", range_min_, 0.0);
+    private_nh_.param<double>("range_max", range_max_, std::numeric_limits<double>::max());
 
     int concurrency_level;
     private_nh_.param<int>("concurrency_level", concurrency_level, 1);
@@ -133,7 +133,7 @@ namespace pointcloud_to_laserscan
                                                tf2_ros::filter_failure_reasons::FilterFailureReason reason)
   {
     NODELET_WARN_STREAM_THROTTLE(1.0, "Can't transform pointcloud from frame " << cloud_msg->header.frame_id << " to "
-        << message_filter_->getTargetFramesString());
+        << message_filter_->getTargetFramesString() << " at time " << cloud_msg->header.stamp << ", reason: " << reason);
   }
 
   void PointCloudToLaserScanNodelet::cloudCb(const sensor_msgs::PointCloud2ConstPtr &cloud_msg)
@@ -180,7 +180,7 @@ namespace pointcloud_to_laserscan
         tf2_->transform(*cloud_msg, *cloud, target_frame_, ros::Duration(tolerance_));
         cloud_out = cloud;
       }
-      catch (tf2::TransformException ex)
+      catch (tf2::TransformException &ex)
       {
         NODELET_ERROR_STREAM("Transform failure: " << ex.what());
         return;
