@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.0 (2017-11-14)
+------------------
 * Added inf_epsilon parameter that determines the value added to max range when use_infs parameter is set to false
 * Merge pull request `#11 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/11>`_ from ros-perception/mikaelarguedas-patch-1
   update to use non deprecated pluginlib macro
