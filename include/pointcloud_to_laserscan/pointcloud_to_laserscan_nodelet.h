@@ -76,6 +76,8 @@ namespace pointcloud_to_laserscan
 
     void disconnectCb();
 
+    void adjust_angle_configuration();
+
     ros::NodeHandle nh_, private_nh_;
     ros::Publisher pub_;
     boost::mutex connect_mutex_;
@@ -90,6 +92,8 @@ namespace pointcloud_to_laserscan
     std::string target_frame_;
     double tolerance_;
     double min_height_, max_height_, angle_min_, angle_max_, angle_increment_, scan_time_, range_min_, range_max_;
+    double angle_lower_bound_, angle_upper_bound_;
+    int ranges_size_;
     bool use_inf_;
     double inf_epsilon_;
   };

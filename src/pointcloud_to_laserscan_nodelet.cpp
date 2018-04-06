@@ -62,6 +62,9 @@ namespace pointcloud_to_laserscan
     private_nh_.param<double>("angle_min", angle_min_, - M_PI);
     private_nh_.param<double>("angle_max", angle_max_, M_PI);
     private_nh_.param<double>("angle_increment", angle_increment_, M_PI / 180.0);
+    private_nh_.param<int>("ranges_size", ranges_size_, 0);
+    adjust_angle_configuration();
+
     private_nh_.param<double>("scan_time", scan_time_, 1.0 / 30.0);
     private_nh_.param<double>("range_min", range_min_, 0.0);
     private_nh_.param<double>("range_max", range_max_, std::numeric_limits<double>::max());
@@ -156,17 +159,14 @@ namespace pointcloud_to_laserscan
     output.range_min = range_min_;
     output.range_max = range_max_;
 
-    //determine amount of rays to create
-    uint32_t ranges_size = std::ceil((output.angle_max - output.angle_min) / output.angle_increment);
-
     //determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
     if (use_inf_)
     {
-      output.ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+      output.ranges.assign(ranges_size_, std::numeric_limits<double>::infinity());
     }
     else
     {
-      output.ranges.assign(ranges_size, output.range_max + inf_epsilon_);
+      output.ranges.assign(ranges_size_, output.range_max + inf_epsilon_);
     }
 
     sensor_msgs::PointCloud2ConstPtr cloud_out;
@@ -220,14 +220,18 @@ namespace pointcloud_to_laserscan
       }
 
       double angle = atan2(*iter_y, *iter_x);
-      if (angle < output.angle_min || angle > output.angle_max)
+      if (angle == M_PI) {
+        // wrap around to get the correct index below
+        angle = -M_PI;
+      }
+      if (angle < angle_lower_bound_ || angle >= angle_upper_bound_)
       {
-        NODELET_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, output.angle_min, output.angle_max);
+        NODELET_DEBUG("rejected for angle %f not in range [%f, %f)\n", angle, angle_lower_bound_, angle_upper_bound_);
         continue;
       }
 
       //overwrite range at laserscan ray if new range is smaller
-      int index = (angle - output.angle_min) / output.angle_increment;
+      int index = (angle - angle_lower_bound_) / angle_increment_;
       if (range < output.ranges[index])
       {
         output.ranges[index] = range;
@@ -235,6 +239,37 @@ namespace pointcloud_to_laserscan
 
     }
     pub_.publish(output);
+  }
+
+  void PointCloudToLaserScanNodelet::adjust_angle_configuration() {
+    // assume the user wants to split the range [angle_min_, angle_max_]
+    // into (mostly) evenly-sized intervals, each reported as a ray pointing
+    // in direction of the center of each interval.
+
+    // user can specify the number of bins directly
+    if (ranges_size_ > 0) {
+      // this is easy: split range to this many intervals
+      angle_increment_ = (angle_max_ - angle_min_) / ranges_size_;
+      // point rays to center of each interval
+      angle_min_ = angle_min_ + angle_increment_ / 2.0;
+      angle_max_ = angle_max_ - angle_increment_ / 2.0;
+      // this should be equivalent here:
+      //angle_max_ = angle_min_ + (ranges_size_ - 1) * angle_increment_;
+    }
+    else {
+      // try to split the range to intervals of specified width
+      // if the configured range is not divisible by the increment, the last bucket may end up larger than it actually is
+      ranges_size_ = std::ceil((angle_max_ - angle_min_) / angle_increment_);
+      // point the rays to the center of each interval
+      angle_min_ = angle_min_ + angle_increment_ / 2.0;
+      angle_max_ = angle_min_ + (ranges_size_ - 1) * angle_increment_;
+      // this is not equivalent in this case:
+      //angle_max_ = angle_max_ - angle_increment_ / 2.0;
+    }
+    // precompute the effective angle value range for convenience
+    // lower bound inclusive, upper bound exclusive
+    angle_lower_bound_ = angle_min_ - angle_increment_ / 2.0;
+    angle_upper_bound_ = angle_max_ + angle_increment_ / 2.0;
   }
 
 }
