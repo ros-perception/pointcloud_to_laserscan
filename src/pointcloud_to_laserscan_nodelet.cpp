@@ -218,6 +218,12 @@ namespace pointcloud_to_laserscan
                       *iter_z);
         continue;
       }
+      if (range > range_max_)
+      {
+        NODELET_DEBUG("rejected for range %f above maximum value %f. Point: (%f, %f, %f)", range, range_max_, *iter_x, *iter_y,
+                      *iter_z);
+        continue;
+      }
 
       double angle = atan2(*iter_y, *iter_x);
       if (angle < output.angle_min || angle > output.angle_max)
