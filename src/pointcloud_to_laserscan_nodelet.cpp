@@ -192,12 +192,35 @@ namespace pointcloud_to_laserscan
       cloud_out = cloud_msg;
     }
 
+    bool flagFirstIteration=true;
+    sensor_msgs::PointCloud2ConstIterator<float> *iter_intensity;
     // Iterate through pointcloud
     for (sensor_msgs::PointCloud2ConstIterator<float>
               iter_x(*cloud_out, "x"), iter_y(*cloud_out, "y"), iter_z(*cloud_out, "z");
               iter_x != iter_x.end();
               ++iter_x, ++iter_y, ++iter_z)
     {
+      if(flagFirstIteration)
+      {
+        flagFirstIteration=false;
+        try
+        {
+          iter_intensity=new sensor_msgs::PointCloud2ConstIterator<float>(*cloud_out, "intensity");
+          output.intensities.assign(ranges_size, 0.0);
+        }
+        catch(...)
+        {
+          iter_intensity=NULL;
+          output.intensities.clear();
+        }
+      }
+      else{
+        if(output.intensities.size()>0)
+        {
+          ++(*iter_intensity);
+        }
+      }
+      
 
       if (std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z))
       {
@@ -237,9 +260,14 @@ namespace pointcloud_to_laserscan
       if (range < output.ranges[index])
       {
         output.ranges[index] = range;
+        if(index<output.intensities.size())
+        {
+          output.intensities[index] = **iter_intensity;
+        }
       }
 
     }
+    if(iter_intensity) delete iter_intensity;
     pub_.publish(output);
   }
 
