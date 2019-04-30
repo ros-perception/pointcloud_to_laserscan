@@ -38,7 +38,8 @@
  * Author: Rein Appeldoorn
  */
 
-#pragma once
+#ifndef POINTCLOUD_TO_LASERSCAN_LASERSCAN_TO_POINTCLOUD_NODELET_H
+#define POINTCLOUD_TO_LASERSCAN_LASERSCAN_TO_POINTCLOUD_NODELET_H
 
 #include <boost/thread/mutex.hpp>
 #include <laser_geometry/laser_geometry.h>
@@ -46,6 +47,7 @@
 #include <nodelet/nodelet.h>
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <string>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
@@ -89,4 +91,6 @@ private:
   double transform_tolerance_;
 };
 
-}  // pointcloud_to_laserscan
+}  // namespace pointcloud_to_laserscan
+
+#endif  // POINTCLOUD_TO_LASERSCAN_LASERSCAN_TO_POINTCLOUD_NODELET_H
