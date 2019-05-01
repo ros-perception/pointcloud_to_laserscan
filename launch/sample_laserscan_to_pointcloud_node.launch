@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="scanner" default="scanner" />
+
+    <!-- Publish as laserscan-->
+    <node pkg="rostopic" type="rostopic" args="pub $(arg scanner)/scan sensor_msgs/LaserScan -r 10
+      '{header: {frame_id: scan},
+        angle_min: -1.0, angle_max: 1.0, angle_increment: 0.1,
+        range_max: 10.0,
+        ranges: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]}'" name="scan_publisher" />
+
+    <!-- run laserscan_to_pointcloud node -->
+    <node pkg="pointcloud_to_laserscan" type="laserscan_to_pointcloud_node" name="laserscan_to_pointcloud">
+
+        <remap from="scan_in" to="$(arg scanner)/scan"/>
+        <remap from="cloud" to="$(arg scanner)/cloud"/>
+        <rosparam>
+            target_frame: scan # Leave disabled to output pointcloud in scan frame
+            transform_tolerance: 0.01
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+
+    </node>
+
+</launch>
