@@ -69,6 +69,7 @@ void PointCloudToLaserScanNodelet::onInit()
   private_nh_.param<double>("range_min", range_min_, 0.0);
   private_nh_.param<double>("range_max", range_max_, std::numeric_limits<double>::max());
   private_nh_.param<double>("inf_epsilon", inf_epsilon_, 1.0);
+  private_nh_.param<double>("clip_range", clip_range_, std::numeric_limits<double>::max());
 
   int concurrency_level;
   private_nh_.param<int>("concurrency_level", concurrency_level, 1);
@@ -219,9 +220,9 @@ void PointCloudToLaserScanNodelet::cloudCb(const sensor_msgs::PointCloud2ConstPt
                     *iter_y, *iter_z);
       continue;
     }
-    if (range > range_max_)
+    if (range > clip_range_)
     {
-      NODELET_DEBUG("rejected for range %f above maximum value %f. Point: (%f, %f, %f)", range, range_max_, *iter_x,
+      NODELET_DEBUG("rejected for range %f above clipping value %f. Point: (%f, %f, %f)", range, clip_range_, *iter_x,
                     *iter_y, *iter_z);
       continue;
     }
