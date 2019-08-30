@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.4.1 (2019-08-30)
+------------------
 * LaserScan to PointCloud node + nodelet (`#28 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/28>`_)
 * fix roslint (`#29 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/29>`_)
 * Merge pull request `#20 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/20>`_ from ros-perception/range_max_check
