@@ -41,6 +41,7 @@
 #ifndef POINTCLOUD_TO_LASERSCAN__LASERSCAN_TO_POINTCLOUD_NODE_HPP_
 #define POINTCLOUD_TO_LASERSCAN__LASERSCAN_TO_POINTCLOUD_NODE_HPP_
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <thread>
@@ -69,18 +70,18 @@ public:
   POINTCLOUD_TO_LASERSCAN_PUBLIC
   explicit LaserScanToPointCloudNode(const rclcpp::NodeOptions & options);
 
-  ~LaserScanToPointCloudNode();
+  ~LaserScanToPointCloudNode() override;
 
 private:
   void scanCallback(sensor_msgs::msg::LaserScan::ConstSharedPtr scan_msg);
 
   void subscriptionListenerThreadLoop();
 
-  std::shared_ptr<tf2_ros::Buffer> tf2_;
-  std::shared_ptr<tf2_ros::TransformListener> tf2_listener_;
+  std::unique_ptr<tf2_ros::Buffer> tf2_;
+  std::unique_ptr<tf2_ros::TransformListener> tf2_listener_;
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> sub_;
   std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::PointCloud2>> pub_;
-  std::shared_ptr<MessageFilter> message_filter_;
+  std::unique_ptr<MessageFilter> message_filter_;
   std::thread subscription_listener_thread_;
   std::atomic_bool alive_{true};
 

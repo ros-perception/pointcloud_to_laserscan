@@ -80,16 +80,17 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   using std::placeholders::_1;
   // if pointcloud target frame specified, we need to filter by transform availability
   if (!target_frame_.empty()) {
-    tf2_.reset(new tf2_ros::Buffer(this->get_clock()));
+    tf2_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
     auto timer_interface = std::make_shared<tf2_ros::CreateTimerROS>(
       this->get_node_base_interface(), this->get_node_timers_interface());
     tf2_->setCreateTimerInterface(timer_interface);
-    tf2_listener_.reset(new tf2_ros::TransformListener(*tf2_));
-    message_filter_.reset(new MessageFilter(sub_, *tf2_, target_frame_, input_queue_size_,
+    tf2_listener_ = std::make_unique<tf2_ros::TransformListener>(*tf2_);
+    message_filter_ = std::make_unique<MessageFilter>(
+      sub_, *tf2_, target_frame_, input_queue_size_,
       this->get_node_logging_interface(),
-      this->get_node_clock_interface()));
-    message_filter_->registerCallback(std::bind(&PointCloudToLaserScanNode::cloudCallback, this,
-      _1));
+      this->get_node_clock_interface());
+    message_filter_->registerCallback(
+      std::bind(&PointCloudToLaserScanNode::cloudCallback, this, _1));
   } else {  // otherwise setup direct subscription
     sub_.registerCallback(std::bind(&PointCloudToLaserScanNode::cloudCallback, this, _1));
   }
@@ -110,7 +111,8 @@ void PointCloudToLaserScanNode::subscriptionListenerThreadLoop()
 
   const std::chrono::milliseconds timeout(100);
   while (rclcpp::ok(context) && alive_.load()) {
-    int subscription_count = pub_->get_subscription_count();
+    int subscription_count = pub_->get_subscription_count() +
+      pub_->get_intra_process_subscription_count();
     if (subscription_count > 0) {
       if (!sub_.getSubscriber()) {
         RCLCPP_INFO(this->get_logger(),
