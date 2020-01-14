@@ -38,59 +38,61 @@
  * Author: Rein Appeldoorn
  */
 
-#ifndef POINTCLOUD_TO_LASERSCAN_LASERSCAN_TO_POINTCLOUD_NODELET_H
-#define POINTCLOUD_TO_LASERSCAN_LASERSCAN_TO_POINTCLOUD_NODELET_H
+#ifndef POINTCLOUD_TO_LASERSCAN__LASERSCAN_TO_POINTCLOUD_NODE_HPP_
+#define POINTCLOUD_TO_LASERSCAN__LASERSCAN_TO_POINTCLOUD_NODE_HPP_
 
-#include <boost/thread/mutex.hpp>
-#include <laser_geometry/laser_geometry.h>
-#include <message_filters/subscriber.h>
-#include <nodelet/nodelet.h>
-#include <ros/ros.h>
-#include <sensor_msgs/LaserScan.h>
+#include <atomic>
+#include <memory>
 #include <string>
-#include <tf2_ros/buffer.h>
-#include <tf2_ros/message_filter.h>
-#include <tf2_ros/transform_listener.h>
+#include <thread>
+
+#include "message_filters/subscriber.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/message_filter.h"
+#include "tf2_ros/transform_listener.h"
+
+#include "laser_geometry/laser_geometry.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/laser_scan.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+
+#include "pointcloud_to_laserscan/visibility_control.h"
 
 namespace pointcloud_to_laserscan
 {
-typedef tf2_ros::MessageFilter<sensor_msgs::LaserScan> MessageFilter;
+typedef tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan> MessageFilter;
 
 //! \brief The PointCloudToLaserScanNodelet class to process incoming laserscans into pointclouds.
 //!
-class LaserScanToPointCloudNodelet : public nodelet::Nodelet
+class LaserScanToPointCloudNode : public rclcpp::Node
 {
 public:
-  LaserScanToPointCloudNodelet();
+  POINTCLOUD_TO_LASERSCAN_PUBLIC
+  explicit LaserScanToPointCloudNode(const rclcpp::NodeOptions & options);
+
+  ~LaserScanToPointCloudNode() override;
 
 private:
-  virtual void onInit();
+  void scanCallback(sensor_msgs::msg::LaserScan::ConstSharedPtr scan_msg);
 
-  void scanCallback(const sensor_msgs::LaserScanConstPtr& scan_msg);
-  void failureCallback(const sensor_msgs::LaserScanConstPtr& scan_msg,
-                       tf2_ros::filter_failure_reasons::FilterFailureReason reason);
+  void subscriptionListenerThreadLoop();
 
-  void connectCb();
-  void disconnectCb();
-
-  ros::NodeHandle nh_;
-  ros::NodeHandle private_nh_;
-  ros::Publisher pub_;
-  boost::mutex connect_mutex_;
-
-  boost::shared_ptr<tf2_ros::Buffer> tf2_;
-  boost::shared_ptr<tf2_ros::TransformListener> tf2_listener_;
-  message_filters::Subscriber<sensor_msgs::LaserScan> sub_;
-  boost::shared_ptr<MessageFilter> message_filter_;
+  std::unique_ptr<tf2_ros::Buffer> tf2_;
+  std::unique_ptr<tf2_ros::TransformListener> tf2_listener_;
+  message_filters::Subscriber<sensor_msgs::msg::LaserScan> sub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::PointCloud2>> pub_;
+  std::unique_ptr<MessageFilter> message_filter_;
+  std::thread subscription_listener_thread_;
+  std::atomic_bool alive_{true};
 
   laser_geometry::LaserProjection projector_;
 
   // ROS Parameters
-  unsigned int input_queue_size_;
+  int input_queue_size_;
   std::string target_frame_;
-  double transform_tolerance_;
+  double tolerance_;
 };
 
 }  // namespace pointcloud_to_laserscan
 
-#endif  // POINTCLOUD_TO_LASERSCAN_LASERSCAN_TO_POINTCLOUD_NODELET_H
+#endif  // POINTCLOUD_TO_LASERSCAN__LASERSCAN_TO_POINTCLOUD_NODE_HPP_
