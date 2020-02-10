@@ -2,8 +2,8 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-02-10)
+------------------
 * ROS 2 Migration (`#33 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/33>`_)
   * ROS 2 Migration
   Signed-off-by: Michel Hidalgo <michel@ekumenlabs.com>
