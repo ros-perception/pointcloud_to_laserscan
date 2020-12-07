@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pointcloud_to_laserscan)
 
+## Compile as C++11, supported in ROS Kinetic and newer
+add_compile_options(-Wall -Wno-psabi -Wextra)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   message_filters
