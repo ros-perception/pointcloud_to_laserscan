@@ -51,7 +51,8 @@ int main(int argc, char * argv[])
 
   sensor_msgs::msg::PointCloud2 dummy_cloud;
   sensor_msgs::PointCloud2Modifier modifier(dummy_cloud);
-  modifier.setPointCloud2Fields(3,
+  modifier.setPointCloud2Fields(
+    3,
     "x", 1, sensor_msgs::msg::PointField::FLOAT32,
     "y", 1, sensor_msgs::msg::PointField::FLOAT32,
     "z", 1, sensor_msgs::msg::PointField::FLOAT32);

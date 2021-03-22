@@ -115,14 +115,16 @@ void PointCloudToLaserScanNode::subscriptionListenerThreadLoop()
       pub_->get_intra_process_subscription_count();
     if (subscription_count > 0) {
       if (!sub_.getSubscriber()) {
-        RCLCPP_INFO(this->get_logger(),
+        RCLCPP_INFO(
+          this->get_logger(),
           "Got a subscriber to laserscan, starting pointcloud subscriber");
         rclcpp::SensorDataQoS qos;
         qos.keep_last(input_queue_size_);
         sub_.subscribe(this, "cloud_in", qos.get_rmw_qos_profile());
       }
     } else if (sub_.getSubscriber()) {
-      RCLCPP_INFO(this->get_logger(),
+      RCLCPP_INFO(
+        this->get_logger(),
         "No subscribers to laserscan, shutting down pointcloud subscriber");
       sub_.unsubscribe();
     }
@@ -179,14 +181,16 @@ void PointCloudToLaserScanNode::cloudCallback(
     iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_z)
   {
     if (std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z)) {
-      RCLCPP_DEBUG(this->get_logger(),
+      RCLCPP_DEBUG(
+        this->get_logger(),
         "rejected for nan in point(%f, %f, %f)\n",
         *iter_x, *iter_y, *iter_z);
       continue;
     }
 
     if (*iter_z > max_height_ || *iter_z < min_height_) {
-      RCLCPP_DEBUG(this->get_logger(),
+      RCLCPP_DEBUG(
+        this->get_logger(),
         "rejected for height %f not in range (%f, %f)\n",
         *iter_z, min_height_, max_height_);
       continue;
@@ -194,13 +198,15 @@ void PointCloudToLaserScanNode::cloudCallback(
 
     double range = hypot(*iter_x, *iter_y);
     if (range < range_min_) {
-      RCLCPP_DEBUG(this->get_logger(),
+      RCLCPP_DEBUG(
+        this->get_logger(),
         "rejected for range %f below minimum value %f. Point: (%f, %f, %f)",
         range, range_min_, *iter_x, *iter_y, *iter_z);
       continue;
     }
     if (range > range_max_) {
-      RCLCPP_DEBUG(this->get_logger(),
+      RCLCPP_DEBUG(
+        this->get_logger(),
         "rejected for range %f above maximum value %f. Point: (%f, %f, %f)",
         range, range_max_, *iter_x, *iter_y, *iter_z);
       continue;
@@ -208,7 +214,8 @@ void PointCloudToLaserScanNode::cloudCallback(
 
     double angle = atan2(*iter_y, *iter_x);
     if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
-      RCLCPP_DEBUG(this->get_logger(),
+      RCLCPP_DEBUG(
+        this->get_logger(),
         "rejected for angle %f not in range (%f, %f)\n",
         angle, scan_msg->angle_min, scan_msg->angle_max);
       continue;
