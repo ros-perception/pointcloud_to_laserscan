@@ -79,8 +79,9 @@ LaserScanToPointCloudNode::LaserScanToPointCloudNode(const rclcpp::NodeOptions &
       sub_, *tf2_, target_frame_, input_queue_size_,
       this->get_node_logging_interface(),
       this->get_node_clock_interface());
-    message_filter_->registerCallback(std::bind(&LaserScanToPointCloudNode::scanCallback, this,
-      _1));
+    message_filter_->registerCallback(
+      std::bind(
+        &LaserScanToPointCloudNode::scanCallback, this, _1));
   } else {  // otherwise setup direct subscription
     sub_.registerCallback(std::bind(&LaserScanToPointCloudNode::scanCallback, this, _1));
   }
@@ -105,14 +106,16 @@ void LaserScanToPointCloudNode::subscriptionListenerThreadLoop()
       pub_->get_intra_process_subscription_count();
     if (subscription_count > 0) {
       if (!sub_.getSubscriber()) {
-        RCLCPP_INFO(this->get_logger(),
+        RCLCPP_INFO(
+          this->get_logger(),
           "Got a subscriber to pointcloud, starting laserscan subscriber");
         rclcpp::SensorDataQoS qos;
         qos.keep_last(input_queue_size_);
         sub_.subscribe(this, "scan_in", qos.get_rmw_qos_profile());
       }
     } else if (sub_.getSubscriber()) {
-      RCLCPP_INFO(this->get_logger(),
+      RCLCPP_INFO(
+        this->get_logger(),
         "No subscribers to pointcloud, shutting down laserscan subscriber");
       sub_.unsubscribe();
     }
