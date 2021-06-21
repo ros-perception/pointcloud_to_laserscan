@@ -16,7 +16,7 @@
     <url type="bugtracker">https://github.com/ros-perception/perception_pcl/issues</url>
     <url type="repository">https://github.com/ros-perception/perception_pcl</url>
 
-    <buildtool_depend>ament_cmake</buildtool_depend>
+    <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
     <depend>laser_geometry</depend>
     <depend>message_filters</depend>
