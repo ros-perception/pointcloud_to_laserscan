@@ -28,14 +28,14 @@ def generate_launch_description():
         ),
         Node(
             package='tf2_ros',
-            node_executable='static_transform_publisher',
-            node_name='static_transform_publisher',
+            executable='static_transform_publisher',
+            name='static_transform_publisher',
             arguments='0 0 0 0 0 0 1 map scan'
         ),
         Node(
             package='pointcloud_to_laserscan',
-            node_executable='laserscan_to_pointcloud_node',
-            node_name='laserscan_to_pointcloud',
+            executable='laserscan_to_pointcloud_node',
+            name='laserscan_to_pointcloud',
             remappings=[('scan_in', [LaunchConfiguration(variable_name='scanner'), '/scan']),
                         ('cloud', [LaunchConfiguration(variable_name='scanner'), '/cloud'])],
             parameters=[{'target_frame': 'scan', 'transform_tolerance': 0.01}]
