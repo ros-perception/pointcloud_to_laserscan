@@ -95,6 +95,8 @@ private:
     range_max_;
   bool use_inf_;
   double inf_epsilon_;
+  std::string point_cloud_topic_;
+  std::string scan_topic_;
 };
 
 }  // namespace pointcloud_to_laserscan
