@@ -2,6 +2,13 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Replace deprecated launch api (`#56 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/56>`_)
+* Fix linting errors in the code (`#52 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/52>`_)
+* Update README.md
+* Contributors: Chris Lalancette, Daisuke Nishimatsu, Paul Bovbel
+
 2.0.0 (2020-02-10)
 ------------------
 * ROS 2 Migration (`#33 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/33>`_)
