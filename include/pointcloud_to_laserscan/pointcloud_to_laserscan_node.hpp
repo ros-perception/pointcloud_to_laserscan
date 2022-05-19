@@ -75,6 +75,7 @@ public:
 
 private:
   void cloudCallback(sensor_msgs::msg::PointCloud2::ConstSharedPtr cloud_msg);
+  void adjust_angle_configuration();
 
   void subscriptionListenerThreadLoop();
 
@@ -95,6 +96,8 @@ private:
     range_max_;
   bool use_inf_;
   double inf_epsilon_;
+  double angle_lower_bound_, angle_upper_bound_;
+  int ranges_size_;
 };
 
 }  // namespace pointcloud_to_laserscan
