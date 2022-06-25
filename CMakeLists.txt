@@ -12,21 +12,24 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
 
-include_directories(include)
-
 add_library(laserscan_to_pointcloud SHARED
   src/laserscan_to_pointcloud_node.cpp)
 target_compile_definitions(laserscan_to_pointcloud
   PRIVATE "POINTCLOUD_TO_LASERSCAN_BUILDING_DLL")
-ament_target_dependencies(laserscan_to_pointcloud
-  "laser_geometry"
-  "message_filters"
-  "rclcpp"
-  "rclcpp_components"
-  "sensor_msgs"
-  "tf2"
-  "tf2_ros"
-  "tf2_sensor_msgs"
+target_include_directories(laserscan_to_pointcloud PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+target_link_libraries(laserscan_to_pointcloud
+  laser_geometry::laser_geometry
+  message_filters::message_filters
+  rclcpp::rclcpp
+  rclcpp_components::component
+  tf2::tf2
+  tf2_ros::tf2_ros
+  # use exported target after https://github.com/ros2/geometry2/pull/536 is merged
+  # tf2_sensor_msgs::tf2_sensor_msgs
+  "${sensor_msgs_TARGETS}"
 )
 rclcpp_components_register_node(laserscan_to_pointcloud
   PLUGIN "pointcloud_to_laserscan::LaserScanToPointCloudNode"
@@ -36,15 +39,20 @@ add_library(pointcloud_to_laserscan SHARED
   src/pointcloud_to_laserscan_node.cpp)
 target_compile_definitions(pointcloud_to_laserscan
   PRIVATE "POINTCLOUD_TO_LASERSCAN_BUILDING_DLL")
-ament_target_dependencies(pointcloud_to_laserscan
-  "laser_geometry"
-  "message_filters"
-  "rclcpp"
-  "rclcpp_components"
-  "sensor_msgs"
-  "tf2"
-  "tf2_ros"
-  "tf2_sensor_msgs"
+target_include_directories(pointcloud_to_laserscan PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+target_link_libraries(pointcloud_to_laserscan
+  laser_geometry::laser_geometry
+  message_filters::message_filters
+  rclcpp::rclcpp
+  rclcpp_components::component
+  tf2::tf2
+  tf2_ros::tf2_ros
+  # use exported target after https://github.com/ros2/geometry2/pull/536 is merged
+  # tf2_sensor_msgs::tf2_sensor_msgs
+  "${sensor_msgs_TARGETS}"
 )
 rclcpp_components_register_node(pointcloud_to_laserscan
   PLUGIN "pointcloud_to_laserscan::PointCloudToLaserScanNode"
@@ -53,9 +61,9 @@ rclcpp_components_register_node(pointcloud_to_laserscan
 add_executable(dummy_pointcloud_publisher
   src/dummy_pointcloud_publisher.cpp
 )
-ament_target_dependencies(dummy_pointcloud_publisher
-  "rclcpp"
-  "sensor_msgs"
+target_link_libraries(dummy_pointcloud_publisher
+  rclcpp::rclcpp
+  "${sensor_msgs_TARGETS}"
 )
 
 install(TARGETS
