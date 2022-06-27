@@ -70,7 +70,7 @@ install(TARGETS
   laserscan_to_pointcloud
   pointcloud_to_laserscan
   EXPORT export_${PROJECT_NAME}
-  RUNTIME DESTINATION lib
+  RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
