@@ -79,7 +79,7 @@ install(TARGETS
 )
 
 install(DIRECTORY include
-  DESTINATION include
+  DESTINATION include/${PROJECT_NAME}
 )
 
 install(DIRECTORY launch
