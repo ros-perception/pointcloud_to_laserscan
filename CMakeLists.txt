@@ -69,6 +69,7 @@ target_link_libraries(dummy_pointcloud_publisher
 install(TARGETS
   laserscan_to_pointcloud
   pointcloud_to_laserscan
+  EXPORT export_${PROJECT_NAME}
   RUNTIME DESTINATION lib
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
