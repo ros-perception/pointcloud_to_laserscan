@@ -92,4 +92,15 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+ament_export_dependencies(
+  laser_geometry
+  message_filters
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  tf2
+  tf2_ros
+  tf2_sensor_msgs
+)
+
 ament_package()
