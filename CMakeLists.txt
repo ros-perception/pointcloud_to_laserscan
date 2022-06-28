@@ -19,6 +19,8 @@ target_compile_definitions(laserscan_to_pointcloud
 target_include_directories(laserscan_to_pointcloud PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+  # remove after https://github.com/ros2/geometry2/pull/536 is merged
+  ${tf2_sensor_msgs_INCLUDE_DIRS}
 )
 target_link_libraries(laserscan_to_pointcloud
   laser_geometry::laser_geometry
@@ -42,6 +44,8 @@ target_compile_definitions(pointcloud_to_laserscan
 target_include_directories(pointcloud_to_laserscan PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+  # remove after https://github.com/ros2/geometry2/pull/536 is merged
+  ${tf2_sensor_msgs_INCLUDE_DIRS}
 )
 target_link_libraries(pointcloud_to_laserscan
   laser_geometry::laser_geometry
