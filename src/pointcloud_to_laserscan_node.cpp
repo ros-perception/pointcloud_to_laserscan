@@ -52,6 +52,8 @@
 #include "tf2_sensor_msgs/tf2_sensor_msgs.h"
 #include "tf2_ros/create_timer_ros.h"
 
+#include "pcl_ros/transforms.hpp"
+
 namespace pointcloud_to_laserscan
 {
 
@@ -167,7 +169,7 @@ void PointCloudToLaserScanNode::cloudCallback(
   if (scan_msg->header.frame_id != cloud_msg->header.frame_id) {
     try {
       auto cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
-      tf2_->transform(*cloud_msg, *cloud, target_frame_, tf2::durationFromSec(tolerance_));
+      pcl_ros::transformPointCloud(scan_msg->header.frame_id, *cloud_msg, *cloud, *tf2_);
       cloud_msg = cloud;
     } catch (tf2::TransformException & ex) {
       RCLCPP_ERROR_STREAM(this->get_logger(), "Transform failure: " << ex.what());

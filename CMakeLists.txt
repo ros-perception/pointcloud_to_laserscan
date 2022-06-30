@@ -11,6 +11,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
+find_package(pcl_ros REQUIRED)
 
 include_directories(include)
 
@@ -45,6 +46,7 @@ ament_target_dependencies(pointcloud_to_laserscan
   "tf2"
   "tf2_ros"
   "tf2_sensor_msgs"
+  "pcl_ros"
 )
 rclcpp_components_register_node(pointcloud_to_laserscan
   PLUGIN "pointcloud_to_laserscan::PointCloudToLaserScanNode"
