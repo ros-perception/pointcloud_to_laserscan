@@ -211,11 +211,13 @@ void PointCloudToLaserScanNode::cloudCallback(
     }
 
     double angle = atan2(*iter_y, *iter_x);
-    // if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
     if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
-        // wrap around to get the correct index below
-        angle = -M_PI;
-      }
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "rejected for angle %f not in range [%f, %f)\n",
+        angle, scan_msg->angle_min, scan_msg->angle_max);
+      continue;
+    }
     if (angle < angle_lower_bound_ || angle >= angle_upper_bound_) {
       RCLCPP_DEBUG(
         this->get_logger(),
@@ -226,6 +228,9 @@ void PointCloudToLaserScanNode::cloudCallback(
 
     // overwrite range at laserscan ray if new range is smaller
     int index = (angle - angle_lower_bound_) / angle_increment_;
+
+    if (index >= scan_msg->ranges.size()) continue;
+
     if (range < scan_msg->ranges[index]) {
       scan_msg->ranges[index] = range;
     }
