@@ -47,3 +47,14 @@ This ROS 2 component re-publishes `sensor_msgs/msg/LaserScan` messages as `senso
 * `queue_size` (double, default: detected number of cores) - Input laser scan queue size.
 * `target_frame` (str, default: none) - If provided, transform the pointcloud into this frame before converting to a laser scan. Otherwise, laser scan will be generated in the same frame as the input point cloud.
 * `transform_tolerance` (double, default: 0.01) - Time tolerance for transform lookups. Only used if a `target_frame` is provided.
+
+
+## Building flag
+
+To impreve the performance, reducing the latency of the node, please build this package using the 'CMAKE_BUILD_TYPE' flag in 'Release' mode.
+```
+colcon build --packages-select pointcloud_to_laserscan --cmake-args -DCMAKE_BUILD_TYPE=Release
+```
+
+
+
