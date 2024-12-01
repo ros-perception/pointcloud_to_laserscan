@@ -1,0 +1,6 @@
+    <!-- run pointcloud_to_laserscan node -->
+    <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
+        <rosparam command="load" file="$(find pointcloud_to_laserscan)/config/pointcloud2_to_laserscan_param.yaml"/>
+        <!-- <remap from="cloud_in" to="$(arg basename)/hokuyo_cloud2"/>
+        <remap from="scan" to="$(arg basename)/scan"/> -->
+    </node>

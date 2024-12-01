@@ -69,6 +69,8 @@ void PointCloudToLaserScanNodelet::onInit()
   private_nh_.param<double>("range_min", range_min_, 0.0);
   private_nh_.param<double>("range_max", range_max_, std::numeric_limits<double>::max());
   private_nh_.param<double>("inf_epsilon", inf_epsilon_, 1.0);
+  private_nh_.param<std::string>("cloud_in", cloud_in_, "/hokuyo3d/hokuyo_cloud2");
+  private_nh_.param<std::string>("scan", scan_, "/hokuyo3d/scan");
 
   int concurrency_level;
   private_nh_.param<int>("concurrency_level", concurrency_level, 1);
