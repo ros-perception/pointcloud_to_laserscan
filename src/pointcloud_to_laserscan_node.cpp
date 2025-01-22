@@ -75,6 +75,17 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   inf_epsilon_ = this->declare_parameter("inf_epsilon", 1.0);
   use_inf_ = this->declare_parameter("use_inf", true);
 
+  auto exclusion_box_x_param_ = this->declare_parameter<std::vector<double>>("exclude_within_x", {0.0, 0.0});
+  auto exclusion_box_y_param_ = this->declare_parameter<std::vector<double>>("exclude_within_y", {0.0, 0.0});
+  auto exclusion_box_z_param_ = this->declare_parameter<std::vector<double>>("exclude_within_z", {0.0, 0.0});
+
+  exclusion_box_min_x_ = exclusion_box_x_param_[0];
+  exclusion_box_max_x_ = exclusion_box_x_param_[1];
+  exclusion_box_min_y_ = exclusion_box_y_param_[0];
+  exclusion_box_max_y_ = exclusion_box_y_param_[1];
+  exclusion_box_min_z_ = exclusion_box_z_param_[0];
+  exclusion_box_max_z_ = exclusion_box_z_param_[1];
+
   pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
 
   using std::placeholders::_1;
@@ -193,6 +204,17 @@ void PointCloudToLaserScanNode::cloudCallback(
         this->get_logger(),
         "rejected for height %f not in range (%f, %f)\n",
         *iter_z, min_height_, max_height_);
+      continue;
+    }
+
+    if ((*iter_x > exclusion_box_min_x_ && *iter_x < exclusion_box_max_x_) &&
+      (*iter_y > exclusion_box_min_y_ && *iter_y < exclusion_box_max_y_) &&
+      (*iter_z > exclusion_box_min_z_ && *iter_z < exclusion_box_max_z_)) {
+      RCLCPP_DEBUG(
+        this->get_logger(),
+        "rejected for point (%f, %f, %f) being in the exclusion region x: (%f, %f) y: (%f, %f), z: (%f, %f)\n",
+        *iter_x, *iter_y, *iter_z, exclusion_box_min_x_, exclusion_box_max_x_, exclusion_box_min_y_,
+        exclusion_box_max_y_, exclusion_box_min_z_, exclusion_box_max_z_);
       continue;
     }
 
