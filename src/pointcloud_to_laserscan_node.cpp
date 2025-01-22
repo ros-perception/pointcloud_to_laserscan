@@ -79,12 +79,26 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   auto exclusion_box_y_param_ = this->declare_parameter<std::vector<double>>("exclude_within_y", {0.0, 0.0});
   auto exclusion_box_z_param_ = this->declare_parameter<std::vector<double>>("exclude_within_z", {0.0, 0.0});
 
-  exclusion_box_min_x_ = exclusion_box_x_param_[0];
-  exclusion_box_max_x_ = exclusion_box_x_param_[1];
-  exclusion_box_min_y_ = exclusion_box_y_param_[0];
-  exclusion_box_max_y_ = exclusion_box_y_param_[1];
-  exclusion_box_min_z_ = exclusion_box_z_param_[0];
-  exclusion_box_max_z_ = exclusion_box_z_param_[1];
+  if ((exclusion_box_x_param_[1] >= exclusion_box_x_param_[0]) &&
+    (exclusion_box_y_param_[1] >= exclusion_box_y_param_[0]) &&
+    (exclusion_box_z_param_[1] >= exclusion_box_z_param_[0]))
+  {
+    exclusion_box_min_x_ = exclusion_box_x_param_[0];
+    exclusion_box_max_x_ = exclusion_box_x_param_[1];
+    exclusion_box_min_y_ = exclusion_box_y_param_[0];
+    exclusion_box_max_y_ = exclusion_box_y_param_[1];
+    exclusion_box_min_z_ = exclusion_box_z_param_[0];
+    exclusion_box_max_z_ = exclusion_box_z_param_[1];
+  }
+  else
+  {
+    exclusion_box_min_x_ = 0.0;
+    exclusion_box_max_x_ = 0.0;
+    exclusion_box_min_y_ = 0.0;
+    exclusion_box_max_y_ = 0.0;
+    exclusion_box_min_z_ = 0.0;
+    exclusion_box_max_z_ = 0.0;
+  }
 
   pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
 
