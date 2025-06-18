@@ -40,7 +40,7 @@
 
 #include <pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet.h>
 #include <sensor_msgs/LaserScan.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <tf2_sensor_msgs/tf2_sensor_msgs.h>
 
@@ -238,4 +238,4 @@ namespace pointcloud_to_laserscan
 
 }
 
-PLUGINLIB_DECLARE_CLASS(pointcloud_to_laserscan, PointCloudToLaserScanNodelet, pointcloud_to_laserscan::PointCloudToLaserScanNodelet, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(pointcloud_to_laserscan::PointCloudToLaserScanNodelet, nodelet::Nodelet)
