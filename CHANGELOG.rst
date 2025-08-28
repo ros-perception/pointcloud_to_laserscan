@@ -2,6 +2,12 @@
 Changelog for package pointcloud_to_laserscan
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2025-08-28)
+------------------
+* remove deprecation warnings (`#102 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/102>`_)
+* Update README.md (`#82 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/82>`_)
+* Contributors: Alejandro Hernández Cordero, Diego Andrés Carvajal Solano
+
 2.0.2 (2024-02-16)
 ------------------
 * feat: use exported targets (`#69 <https://github.com/ros-perception/pointcloud_to_laserscan/issues/69>`_)
