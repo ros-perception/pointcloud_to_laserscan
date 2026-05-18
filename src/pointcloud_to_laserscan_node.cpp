@@ -74,8 +74,11 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   range_max_ = this->declare_parameter("range_max", std::numeric_limits<double>::max());
   inf_epsilon_ = this->declare_parameter("inf_epsilon", 1.0);
   use_inf_ = this->declare_parameter("use_inf", true);
+  use_max_ = this->declare_parameter("use_max", false);
 
   pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::SensorDataQoS());
+  pub_min_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan/min", rclcpp::SensorDataQoS());
+  pub_max_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan/max", rclcpp::SensorDataQoS());
 
   using std::placeholders::_1;
   // if pointcloud target frame specified, we need to filter by transform availability
@@ -113,6 +116,10 @@ void PointCloudToLaserScanNode::subscriptionListenerThreadLoop()
   while (rclcpp::ok(context) && alive_.load()) {
     int subscription_count = pub_->get_subscription_count() +
       pub_->get_intra_process_subscription_count();
+    subscription_count += pub_min_->get_subscription_count() +
+      pub_min_->get_intra_process_subscription_count();
+    subscription_count += pub_max_->get_subscription_count() +
+      pub_max_->get_intra_process_subscription_count();      
     if (subscription_count > 0) {
       if (!sub_.getSubscriber()) {
         RCLCPP_INFO(
@@ -138,33 +145,36 @@ void PointCloudToLaserScanNode::cloudCallback(
   sensor_msgs::msg::PointCloud2::ConstSharedPtr cloud_msg)
 {
   // build laserscan output
-  auto scan_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
-  scan_msg->header = cloud_msg->header;
+  auto scan_min_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
+  auto scan_max_msg = std::make_unique<sensor_msgs::msg::LaserScan>();  
+  scan_min_msg->header = scan_max_msg->header = cloud_msg->header;
   if (!target_frame_.empty()) {
-    scan_msg->header.frame_id = target_frame_;
+    scan_min_msg->header.frame_id = scan_max_msg->header.frame_id = target_frame_;
   }
 
-  scan_msg->angle_min = angle_min_;
-  scan_msg->angle_max = angle_max_;
-  scan_msg->angle_increment = angle_increment_;
-  scan_msg->time_increment = 0.0;
-  scan_msg->scan_time = scan_time_;
-  scan_msg->range_min = range_min_;
-  scan_msg->range_max = range_max_;
+  scan_min_msg->angle_min = scan_max_msg->angle_min = angle_min_;
+  scan_min_msg->angle_max = scan_max_msg->angle_max = angle_max_;
+  scan_min_msg->angle_increment = scan_max_msg->angle_increment = angle_increment_;
+  scan_min_msg->time_increment = scan_max_msg->time_increment = 0.0;
+  scan_min_msg->scan_time = scan_max_msg->scan_time = scan_time_;
+  scan_min_msg->range_min = scan_max_msg->range_min = range_min_;
+  scan_min_msg->range_max = scan_max_msg->range_max = range_max_;
 
   // determine amount of rays to create
   uint32_t ranges_size = std::ceil(
-    (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
+    (angle_max_ - angle_min_) / angle_increment_);
 
   // determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
   if (use_inf_) {
-    scan_msg->ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+    scan_min_msg->ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+    scan_max_msg->ranges.assign(ranges_size, 0.0);    
   } else {
-    scan_msg->ranges.assign(ranges_size, scan_msg->range_max + inf_epsilon_);
+    scan_min_msg->ranges.assign(ranges_size, range_max_ + inf_epsilon_);
+    scan_max_msg->ranges.assign(ranges_size, 0.0);
   }
 
   // Transform cloud if necessary
-  if (scan_msg->header.frame_id != cloud_msg->header.frame_id) {
+  if (scan_min_msg->header.frame_id != cloud_msg->header.frame_id) {
     try {
       auto cloud = std::make_shared<sensor_msgs::msg::PointCloud2>();
       tf2_->transform(*cloud_msg, *cloud, target_frame_, tf2::durationFromSec(tolerance_));
@@ -213,21 +223,33 @@ void PointCloudToLaserScanNode::cloudCallback(
     }
 
     double angle = atan2(*iter_y, *iter_x);
-    if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
+    if (angle < angle_min_ || angle > angle_max_) {
       RCLCPP_DEBUG(
         this->get_logger(),
         "rejected for angle %f not in range (%f, %f)\n",
-        angle, scan_msg->angle_min, scan_msg->angle_max);
+        angle, angle_min_, angle_max_);
       continue;
     }
 
     // overwrite range at laserscan ray if new range is smaller
-    int index = (angle - scan_msg->angle_min) / scan_msg->angle_increment;
-    if (range < scan_msg->ranges[index]) {
-      scan_msg->ranges[index] = range;
+    int index = (angle - angle_min_) / angle_increment_;
+    if (range > scan_max_msg->ranges[index]) {
+      scan_max_msg->ranges[index] = range;
+    }
+    if (range < scan_min_msg->ranges[index]) {
+      scan_min_msg->ranges[index] = range;
     }
   }
-  pub_->publish(std::move(scan_msg));
+
+  if(use_max_) {
+    auto ptr = std::make_unique<sensor_msgs::msg::LaserScan>(*scan_max_msg);    
+    pub_->publish(std::move(ptr));
+  } else {
+    auto ptr = std::make_unique<sensor_msgs::msg::LaserScan>(*scan_min_msg);  
+    pub_->publish(std::move(ptr));
+  }
+  pub_min_->publish(std::move(scan_min_msg)); 
+  pub_max_->publish(std::move(scan_max_msg));  
 }
 
 }  // namespace pointcloud_to_laserscan
