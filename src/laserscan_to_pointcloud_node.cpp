@@ -101,6 +101,7 @@ void LaserScanToPointCloudNode::subscriptionListenerThreadLoop()
   rclcpp::Context::SharedPtr context = this->get_node_base_interface()->get_context();
 
   const std::chrono::milliseconds timeout(100);
+  rclcpp::Event::SharedPtr event = this->get_graph_event();
   while (rclcpp::ok(context) && alive_.load()) {
     int subscription_count = pub_->get_subscription_count() +
       pub_->get_intra_process_subscription_count();
@@ -119,8 +120,8 @@ void LaserScanToPointCloudNode::subscriptionListenerThreadLoop()
         "No subscribers to pointcloud, shutting down laserscan subscriber");
       sub_.unsubscribe();
     }
-    rclcpp::Event::SharedPtr event = this->get_graph_event();
     this->wait_for_graph_change(event, timeout);
+    event->check_and_clear();
   }
   sub_.unsubscribe();
 }
