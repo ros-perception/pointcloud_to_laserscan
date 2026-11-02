@@ -161,8 +161,11 @@ void PointCloudToLaserScanNode::cloudCallback(
   scan_msg->range_max = range_max_;
 
   // determine amount of rays to create
-  uint32_t ranges_size = std::ceil(
-    (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
+  uint32_t ranges_size = 0;
+  if (scan_msg->angle_increment > 0.0 && scan_msg->angle_max > scan_msg->angle_min) {
+    ranges_size = std::ceil(
+      (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
+  }
 
   // determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
   if (use_inf_) {
@@ -231,6 +234,12 @@ void PointCloudToLaserScanNode::cloudCallback(
 
     // overwrite range at laserscan ray if new range is smaller
     int index = (angle - scan_msg->angle_min) / scan_msg->angle_increment;
+    if (index >= 0 && static_cast<uint32_t>(index) == ranges_size) {
+      index = ranges_size - 1;
+    }
+    if (index < 0 || static_cast<uint32_t>(index) >= ranges_size) {
+      continue;
+    }
     if (range < scan_msg->ranges[index]) {
       scan_msg->ranges[index] = range;
     }
