@@ -48,6 +48,8 @@
 #include <thread>
 #include <utility>
 
+#include "rcl_interfaces/msg/floating_point_range.hpp"
+#include "rcl_interfaces/msg/parameter_descriptor.hpp"
 #include "sensor_msgs/point_cloud2_iterator.hpp"
 #include "tf2_sensor_msgs/tf2_sensor_msgs.hpp"
 #include "tf2_ros/create_timer_ros.h"
@@ -71,7 +73,15 @@ PointCloudToLaserScanNode::PointCloudToLaserScanNode(const rclcpp::NodeOptions &
   angle_increment_ = this->declare_parameter("angle_increment", M_PI / 180.0);
   scan_time_ = this->declare_parameter("scan_time", 1.0 / 30.0);
   range_min_ = this->declare_parameter("range_min", 0.0);
-  range_max_ = this->declare_parameter("range_max", std::numeric_limits<double>::max());
+
+  auto highest_max_range = std::nextafter(std::numeric_limits<float>::max(), 0.0f);
+  rcl_interfaces::msg::ParameterDescriptor range_max_desc;
+  rcl_interfaces::msg::FloatingPointRange range_max_range;
+  range_max_range.from_value = 0.0;
+  range_max_range.to_value = highest_max_range;
+  range_max_desc.floating_point_range.push_back(range_max_range);
+  range_max_ = this->declare_parameter(
+    "range_max", static_cast<double>(highest_max_range), range_max_desc);
   inf_epsilon_ = this->declare_parameter("inf_epsilon", 1.0);
   use_inf_ = this->declare_parameter("use_inf", true);
 
