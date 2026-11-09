@@ -81,7 +81,7 @@ private:
   std::unique_ptr<tf2_ros::Buffer> tf2_;
   std::unique_ptr<tf2_ros::TransformListener> tf2_listener_;
   message_filters::Subscriber<sensor_msgs::msg::PointCloud2> sub_;
-  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::LaserScan>> pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::LaserScan>> pub_, pub_min_, pub_max_;
   std::unique_ptr<MessageFilter> message_filter_;
 
   std::thread subscription_listener_thread_;
@@ -94,6 +94,7 @@ private:
   double min_height_, max_height_, angle_min_, angle_max_, angle_increment_, scan_time_, range_min_,
     range_max_;
   bool use_inf_;
+  bool use_max_;
   double inf_epsilon_;
 };
 
